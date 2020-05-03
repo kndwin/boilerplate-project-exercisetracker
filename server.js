@@ -1,13 +1,51 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
+'use strict';
 
-const cors = require('cors')
+const express = require('express');
+const bodyParser = require('body-parser');
 
-const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+const cors = require('cors');
+const mongoose = require('mongoose');
 
-app.use(cors())
+const app = express();
+
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
+mongoose.connect( process.env.MLAB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+
+const Schema = mongoose.Schema;
+
+const usersSchema = new Schema ({
+    "user": {
+        type: String,
+        required: true
+    },
+    "id": Number
+});
+
+const exerciseSchema = new Schema ({
+    "user" : {
+        type: String,
+        required: true
+    },
+    "description": {
+        type: String,
+        required: true
+    },
+    "duration": {
+        type: Number,
+        required: true
+    },
+    "date": {
+        type: Date
+    }
+});
+
+app.use(cors());
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
