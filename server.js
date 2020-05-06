@@ -1,9 +1,8 @@
-'use strict';
-
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const shortid = require('shortid');
 
 const app = express();
 app.use(cors());
@@ -68,7 +67,7 @@ app.post("/api/exercise/new-user", function( req, res ) {
     // update
     res.json({ 
         username: req.body.username,
-        _id: 10000
+        _id: shortid.generate()
     });
     err ? done(err) : done(null, count);
 });
