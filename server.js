@@ -6,6 +6,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
+app.use(cors());
+app.use(
+    bodyParser.urlencoded({extended: false}),
+    bodyParser.json()
+);
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -15,13 +20,38 @@ mongoose.connect(process.env.MLAB_URI, {
     useUnifiedTopology: true
 });
 
-app.use(cors());
+const Schema = mongoose.Schema;
 
-app.use(
-    bodyParser.urlencoded({extended: false}),
-    bodyParser.json()
-);
+const userSchema = new Schema ({
+    username: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: String
+    }
+});
 
+const exerciseSchema = new Schema ({
+    userId: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    duration: {
+        type: Number,
+        required: true
+    },
+    date: {
+        type: Date
+    }
+});
+
+const User = mongoose.model('User', userSchema);
+const ExerciseSchema = mongoose.model('Exercise', exerciseSchema);
 
 app.use(express.static('public'));
 app.get('/', (req, res) => {
