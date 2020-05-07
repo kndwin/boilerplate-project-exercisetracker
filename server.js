@@ -5,19 +5,22 @@ const cors = require('cors');
 const shortid = require('shortid');
 
 const app = express();
-app.use(cors());
-app.use(
-    bodyParser.urlencoded({extended: false}),
-    bodyParser.json()
-);
 
+var done = (err, data) => {
+    if (err) {
+        console.log("Error" + err);
+    } else {
+        console.log("Completed: " + data);
+    }
+};
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
-mongoose.connect(process.env.MLAB_URI, {
+const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true
-});
+};
+mongoose.connect(process.env.MLAB_URI, options); 
 
 const Schema = mongoose.Schema;
 
@@ -26,9 +29,7 @@ const userSchema = new Schema ({
         type: String,
         required: true
     },
-    userId: {
-        type: String
-    }
+    userId: String
 });
 
 const exerciseSchema = new Schema ({
@@ -52,6 +53,11 @@ const exerciseSchema = new Schema ({
 const User = mongoose.model('User', userSchema);
 const ExerciseSchema = mongoose.model('Exercise', exerciseSchema);
 
+app.use(cors());
+app.use(
+    bodyParser.urlencoded({extended: false}),
+    bodyParser.json()
+);
 app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
@@ -65,11 +71,15 @@ app.get("/api/exercise/log", function( req, res ) {
 // POST response
 app.post("/api/exercise/new-user", function( req, res ) {
     // update
-    res.json({ 
+    const user  = new User ({
         username: req.body.username,
-        _id: shortid.generate()
+        userId: shortid.generate()
     });
-    err ? done(err) : done(null, count);
+    user.save((err) => { if (err) return done(err); });
+    res.json({ 
+        username: user._doc.username,
+        userId: user._doc.userId
+    });
 });
 
 app.post("/api/exercise/add", function( req, res ) {
