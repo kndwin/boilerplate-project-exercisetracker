@@ -6,6 +6,10 @@ const shortid = require('shortid');
 
 const app = express();
 
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 var done = (err, data) => {
     if (err) {
         console.log("Error" + err);
@@ -13,24 +17,15 @@ var done = (err, data) => {
         console.log("Completed: " + data);
     }
 };
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
+
 const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true
 };
+
 mongoose.connect(process.env.MLAB_URI, options); 
 
 const Schema = mongoose.Schema;
-
-const userSchema = new Schema ({
-    username: {
-        type: String,
-        required: true
-    },
-    userId: String
-});
 
 const exerciseSchema = new Schema ({
     userId: {
@@ -48,6 +43,15 @@ const exerciseSchema = new Schema ({
     date: {
         type: Date
     }
+});
+
+const userSchema = new Schema ({
+    username: {
+        type: String,
+        required: true
+    },
+    userId: String,
+    log: [exerciseSchema]
 });
 
 const User = mongoose.model('User', userSchema);
@@ -69,33 +73,38 @@ app.get("/api/exercise/log", function( req,res ) {
 });
 
 // POST response
-app.post("/api/exercise/new-user", function( req,res ) {
-    const newUser  = {
+app.post("/api/exercise/new-user", function(req,res) {
+    const newUser = {
         username: req.body.username,
-        userId: shortid.generate()
+        userId: shortid.generate(),
+        log: []
     };
-    User.findOne({ username: newUser.username })
-        .exec().then(user => {
-            if (!user) {
-                User.create(newUser, ( err,data ) => {
-                    res.json(newUser);
-                    return err ? done(err) : done(null,data);
+    User.findOne({ username: newUser.username }, (err,user) => {
+        if (!user) {
+            User.create(newUser, (err,data) => {
+                res.json({
+                    username: newUser.username,
+                    _id: newUser.userId
                 });
-            } else {
-                res.json("User already exist");
-                return user;
-            }
-        });
+                return err ? done(err) : done(null,data);
+            });
+        } else {
+            res.json("User already exist");
+        }
+        return err ? done(err) : done(null,done);
+    });
 });
 
 app.post("/api/exercise/add", function( req, res ) {
-    
-    res.json({ 
+    const newExercise = {
         userId: req.body.userId,
         description: req.body.description,
         duration: req.body.duration,
-        date: '2020-05-05'
-    });
+        date: req.body.date == "" ? new Date().toDateString() :
+            new Date(req.body.date).toDateString()
+    };
+
+    res.json( newExercise );
     err ? done(err) : done(null, count);
 });
 
