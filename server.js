@@ -64,25 +64,32 @@ app.get('/', (req, res) => {
 });
 
 // GET response
-app.get("/api/exercise/log", function( req, res ) {
+app.get("/api/exercise/log", function( req,res ) {
     res.json({ greetings: "hey" });
 });
 
 // POST response
-app.post("/api/exercise/new-user", function( req, res ) {
-    // update
-    const user  = new User ({
+app.post("/api/exercise/new-user", function( req,res ) {
+    const newUser  = {
         username: req.body.username,
         userId: shortid.generate()
-    });
-    user.save((err) => { if (err) return done(err); });
-    res.json({ 
-        username: user._doc.username,
-        userId: user._doc.userId
-    });
+    };
+    User.findOne({ username: newUser.username })
+        .exec().then(user => {
+            if (!user) {
+                User.create(newUser, ( err,data ) => {
+                    res.json(newUser);
+                    return err ? done(err) : done(null,data);
+                });
+            } else {
+                res.json("User already exist");
+                return user;
+            }
+        });
 });
 
 app.post("/api/exercise/add", function( req, res ) {
+    
     res.json({ 
         userId: req.body.userId,
         description: req.body.description,
