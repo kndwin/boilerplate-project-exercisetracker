@@ -74,38 +74,62 @@ app.get("/api/exercise/log", function( req,res ) {
 
 // POST response
 app.post("/api/exercise/new-user", function(req,res) {
-    const newUser = {
-        username: req.body.username,
-        userId: shortid.generate(),
-        log: []
-    };
-    User.findOne({ username: newUser.username }, (err,user) => {
-        if (!user) {
-            User.create(newUser, (err,data) => {
-                res.json({
-                    username: newUser.username,
-                    _id: newUser.userId
-                });
-                return err ? done(err) : done(null,data);
-            });
-        } else {
-            res.json("User already exist");
-        }
-        return err ? done(err) : done(null,done);
-    });
+  const newUser = {
+    username: req.body.username,
+    userId: shortid.generate(),
+    log: []
+  };
+  User.findOne({ username: newUser.username }, (err,user) => {
+    if (user == null) {
+      User.create(newUser, (err,data) => {
+        res.json({
+          username: newUser.username,
+          _id: newUser.userId
+        });
+        return err ? done(err) : done(null,data);
+      });
+    } else {
+      res.json("User already exist");
+    }
+    return err ? done(err) : done(null,done);
+  });
 });
 
 app.post("/api/exercise/add", function( req, res ) {
-    const newExercise = {
-        userId: req.body.userId,
-        description: req.body.description,
-        duration: req.body.duration,
-        date: req.body.date == "" ? new Date().toDateString() :
-            new Date(req.body.date).toDateString()
-    };
 
-    res.json( newExercise );
-    err ? done(err) : done(null, count);
+  const usernameFound = User.findOne({ userId: req.body.userId })
+    .exec().then(user => {
+      if (user != null) {
+        newExercise.username = user.username;
+      } 
+  }).catch(err => done(err));
+
+   const newExercise = {
+    userId: req.body.userId,
+    username: "",
+    description: req.body.description,
+    duration: req.body.duration,
+    date: req.body.date === "" ? new Date().toDateString() :
+        new Date(req.body.date).toDateString()
+  };
+   
+  if (newExercise.userId === "") {
+    res.json( "Please enter a user ID" );
+  } else if (newExercise.description === "") {
+    res.json( "Please enter a description" );
+  } else if (newExercise.duration === "") {
+    res.json( "Please enter a duration" );
+  } else {
+    if (isNaN(parseInt(newExercise.duration)) == true) {
+      res.json( "Please enter a duration with numbers" );
+    } else {
+      res.json( newExercise );
+    }
+    
+
+  }
+
+  err ? done(err) : done(null, count);
 });
 
 // Not found middleware
