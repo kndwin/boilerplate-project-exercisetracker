@@ -27,35 +27,20 @@ mongoose.connect(process.env.MLAB_URI, options);
 
 const Schema = mongoose.Schema;
 
-const exerciseSchema = new Schema ({
-    userId: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    duration: {
-        type: Number,
-        required: true
-    },
-    date: {
-        type: Date
-    }
-});
-
 const userSchema = new Schema ({
-    username: {
-        type: String,
-        required: true
-    },
-    userId: String,
-    log: [exerciseSchema]
+  username: {
+    type: String,
+    required: true
+  },
+  userId: String,
+  logs: [{
+    description: String, 
+    duration: Number, 
+    date: Date 
+  }]
 });
 
 const User = mongoose.model('User', userSchema);
-const ExerciseSchema = mongoose.model('Exercise', exerciseSchema);
 
 app.use(cors());
 app.use(
@@ -76,11 +61,10 @@ app.get("/api/exercise/log", function( req,res ) {
 app.post("/api/exercise/new-user", function(req,res) {
   const newUser = {
     username: req.body.username,
-    userId: shortid.generate(),
-    log: []
+    userId: shortid.generate()
   };
   User.findOne({ username: newUser.username }, (err,user) => {
-    if (user == null) {
+    if (user === null) {
       User.create(newUser, (err,data) => {
         res.json({
           username: newUser.username,
@@ -97,13 +81,6 @@ app.post("/api/exercise/new-user", function(req,res) {
 
 app.post("/api/exercise/add", function( req, res ) {
 
-  const usernameFound = User.findOne({ userId: req.body.userId })
-    .exec().then(user => {
-      if (user != null) {
-        newExercise.username = user.username;
-      } 
-  }).catch(err => done(err));
-
    const newExercise = {
     userId: req.body.userId,
     username: "",
@@ -113,23 +90,41 @@ app.post("/api/exercise/add", function( req, res ) {
         new Date(req.body.date).toDateString()
   };
    
-  if (newExercise.userId === "") {
-    res.json( "Please enter a user ID" );
-  } else if (newExercise.description === "") {
-    res.json( "Please enter a description" );
-  } else if (newExercise.duration === "") {
-    res.json( "Please enter a duration" );
-  } else {
-    if (isNaN(parseInt(newExercise.duration)) == true) {
-      res.json( "Please enter a duration with numbers" );
-    } else {
-      res.json( newExercise );
-    }
-    
+  User.findOne({ userId: req.body.userId })
+    .exec().then(user => {
+      if (user !== null) {
+        newExercise.username = user.username;
+      } else {
+        newExercise.username = "User doesn't exist";
+      }
+      return newExercise;
+    }).then( exercise => {
+      if (exercise.userId === "") {
+        res.json( "Please enter a user ID" );
+      } else if (exercise.description === "") {
+        res.json( "Please enter a description" );
+      } else if (exercise.duration === "") {
+        res.json( "Please enter a duration" );
+      } else {
+        if (isNaN(parseInt(exercise.duration)) === true) {
+          res.json( "Please enter a duration with numbers" );
+        } else {
+          console.log("Hey!");
+          const log = {
+            description: exercise.description,
+            duration: exercise.duration,
+            date: exercise.date
+          };
+          User.findOne({ userId: exercise.userId })
+            .exec().then(userFound => {
+              userFound.logs.push(log);
+              userFound.save(done);
+          }).catch(err => done(err));
+          res.json( log );
+        }
+      }
+    }).catch(err => done(err));
 
-  }
-
-  err ? done(err) : done(null, count);
 });
 
 // Not found middleware
