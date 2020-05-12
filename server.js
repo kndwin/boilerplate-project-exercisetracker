@@ -7,20 +7,20 @@ const shortid = require('shortid');
 const app = express();
 
 if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
+  require('dotenv').config();
 }
 
 var done = (err, data) => {
-    if (err) {
-        console.log("Error" + err);
-    } else {
-        console.log("Completed: " + data);
-    }
+  if (err) {
+    console.log("Error" + err);
+  } else {
+    console.log("Completed: " + data);
+  }
 };
 
 const options = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 };
 
 mongoose.connect(process.env.MLAB_URI, options); 
@@ -54,7 +54,44 @@ app.get('/', (req, res) => {
 
 // GET response
 app.get("/api/exercise/log", function( req,res ) {
-    res.json({ greetings: "hey" });
+  if (req.query.userId !== undefined) {
+    User.find({ userId: req.query.userId}, 
+      '-_id -logs._id -__v').exec().then( user => {
+        // Array to Object
+        user = user[0]; 
+        // User exists
+        if (user !== undefined) { 
+          const optional = {
+            from: req.query.from,
+            to: req.query.to,
+            limit: req.query.limit
+          };
+
+          // Filter out result based on existing properties
+          if (optional.from !== undefined) {
+            user.logs = user.logs.filter( log => 
+              log.date >= new Date(optional.from)
+            );
+          } 
+          if (optional.to !== undefined){
+            user.logs = user.logs.filter( log => 
+              log.date <= new Date(optional.to)
+            );
+          }
+          if (optional.limit !== undefined) {
+            user.logs = user.logs.slice(0, optional.limit);
+          }
+          res.json( user );
+        } else {
+          res.json("User doesn't exist");
+        }
+      }) .catch(err => done(err));
+  } else {
+    // Return all users
+    User.find({}, '-_id -__v -logs._id').exec()
+      .then( logs => { res.json( logs );
+    }).catch(err => done(err));
+  }
 });
 
 // POST response
@@ -77,10 +114,15 @@ app.post("/api/exercise/new-user", function(req,res) {
     }
     return err ? done(err) : done(null,done);
   });
+  //User.findOne({ username: req.body.username }).exec().then( user => {
+    //if (user !== null) throw "User already exist"
+    //return {
+//
+    //}
+  //}).catch(err => done(err));
 });
 
 app.post("/api/exercise/add", function( req, res ) {
-
    const newExercise = {
     userId: req.body.userId,
     username: "",
@@ -90,8 +132,7 @@ app.post("/api/exercise/add", function( req, res ) {
         new Date(req.body.date).toDateString()
   };
    
-  User.findOne({ userId: req.body.userId })
-    .exec().then(user => {
+  User.findOne({ userId: req.body.userId }).then(user => {
       if (user !== null) {
         newExercise.username = user.username;
       } else {
@@ -124,7 +165,6 @@ app.post("/api/exercise/add", function( req, res ) {
         }
       }
     }).catch(err => done(err));
-
 });
 
 // Not found middleware
