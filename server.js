@@ -167,7 +167,13 @@ app.post("/api/exercise/add", function( req, res ) {
               userFound.logs.push(log);
               userFound.save(done);
           }).catch(err => done(err));
-          res.json( log );
+          res.json({
+            username: exercise.username,
+            description: exercise.description,
+            duration: exercise.duration,
+            _id: exercise.userId,
+            date: new Date(exercise.date).toDateString()
+          });
         }
       }
     }).catch(err => done(err));
