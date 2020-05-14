@@ -94,6 +94,12 @@ app.get("/api/exercise/log", function( req,res ) {
   }
 });
 
+app.get("/api/exercise/users", function (req,res) {
+  User.find({}, '-_id -__v -logs').then( users => {
+    res.json(users)
+  })
+})
+
 // POST response
 app.post("/api/exercise/new-user", function(req,res) {
   const newUser = {
