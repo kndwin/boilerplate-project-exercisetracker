@@ -84,15 +84,21 @@ module.exports = function(app) {
   });
 
   app.post("/api/exercise/add", function( req, res ) {
-    console.log(`Debug: req = ${req}`)
+    console.log(`Debug: req = ${req.body.date}`)
     console.log(`Debug: res = ${res}`)
     User.findOne({ userId: req.body.userId }).then(user => {
       if (user === null) {
         res.json("The user does not exist");
         return Promise.reject(new Error("The user does not exist"));
       } else {
-        var { userId, username, description, duration, date } = req.body
-        date = new Date (date)
+        var { userId, username, description, duration } = req.body
+        var date = req.body.date;
+        if (date == "") {
+          console.log("Date is null")
+          date = new Date();
+        }
+
+        console.log(`Date after conversion: ${date}`)
 
         if (userId === "") {
           res.json( "Please enter a user ID" );
