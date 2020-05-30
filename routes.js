@@ -89,7 +89,7 @@ module.exports = function(app) {
         res.json("The user does not exist");
         return Promise.reject(new Error("The user does not exist"));
       } else {
-        const { userId, username, description, duration, date } = req.body
+        var { userId, username, description, duration, date } = req.body
         date = new Date (date)
 
         if (userId === "") {
