@@ -1,4 +1,5 @@
 const User = require('./userModel.js')
+const shortid = require('shortid');
 
 module.exports = function(app) {
   var done = (err, data) => {
