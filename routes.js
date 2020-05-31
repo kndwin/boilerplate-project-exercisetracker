@@ -87,7 +87,7 @@ module.exports = function(app) {
     console.log("========================")
     console.log("req=====================")
     console.log("========================")
-    console.log(req.body)
+    console.log(JSON.stringify(req.body, null, 2))
     User.findOne({ userId: req.body.userId }).then(user => {
       if (user === null) {
         res.json("The user does not exist");
