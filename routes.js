@@ -93,7 +93,7 @@ module.exports = function(app) {
       } else {
         var { userId, username, description, duration } = req.body
         var date = req.body.date;
-        if (date == "" || date == undefined) {
+        if (date == "") {
           console.log("Date is null")
           date = new Date();
         }
@@ -108,7 +108,7 @@ module.exports = function(app) {
           res.json( "Please enter a duration" );
         } else if (isNaN(parseInt(duration)) === true) {
           res.json( "Please enter a duration with numbers" );
-        } else if (date == "Invalid Date") {
+        } else if (date == "Invalid Date" || date == undefined) {
           res.json("Please enter a valid date")
         } else {
           const log = {
