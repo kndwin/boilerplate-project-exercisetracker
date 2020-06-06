@@ -93,10 +93,9 @@ module.exports = function(app) {
         res.json("The user does not exist");
         return Promise.reject(new Error("The user does not exist"));
       } else {
-        var { userId, username, description, duration } = req.body
-        var date = req.body.date;
-        if (date == "") {
-          console.log("Date is null")
+        var { userId, username, description, duration, date } = req.body
+
+        if (date == "" || date == undefined) {
           date = new Date();
         }
 
@@ -110,7 +109,7 @@ module.exports = function(app) {
           res.json( "Please enter a duration" );
         } else if (isNaN(parseInt(duration)) === true) {
           res.json( "Please enter a duration with numbers" );
-        } else if (date == "Invalid Date" || date == undefined) {
+        } else if (date == "Invalid Date" ) {
           res.json("Please enter a valid date")
         } else {
           const log = {
