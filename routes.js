@@ -59,15 +59,16 @@ module.exports = function(app) {
       .then(user => {
         if (user === null) {
           res.json("The user does not exist");
-          return Promise.reject("The user does not exist");
+          return;
         } else {
-          var { userId, username, description, 
+          var { userId, description, 
               duration, date } = req.body
           if (date == "" || date == undefined) {
             date = new Date();
           } else {
             date = new Date(date);
           }
+          c
 
           if (userId === "") {
             res.json( "Please enter a user ID" );
@@ -85,13 +86,19 @@ module.exports = function(app) {
             console.log(req.body);
             console.log("--------------------------------------")
             res.json({
-              username: username,
-              description: description,
-              duration: duration,
               _id: userId,
+              username: user.username,
+              description,
+              duration: +duration,
               date: date.toDateString(),
             });
-           
+            console.log({
+              username: username,
+              description: description,
+              duration: +duration,
+              _id: userId,
+              date: date.toDateString(),
+            })
             user.log.push({
               description: description,
               duration: duration,
