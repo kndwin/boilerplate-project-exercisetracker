@@ -72,7 +72,7 @@ module.exports = function(app) {
           } else if (date == "Invalid Date" ) {
             res.json("Please enter a valid date")
           } else {
-
+            console.log(req.body);
             res.json({
               username: username,
               description: description,
