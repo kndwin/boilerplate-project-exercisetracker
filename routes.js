@@ -35,7 +35,7 @@ module.exports = function(app) {
   // creating a user.
   
   app.get("/api/exercise/users", function (req,res) {
-    User.find({}, '-_id -__v -logs').then( users => {
+    User.find({}, '-_id -__v -log').then( users => {
       res.json(users);
     });
   });
@@ -55,9 +55,10 @@ module.exports = function(app) {
         } else {
           var { userId, username, description, 
               duration, date } = req.body
-          date = new Date(date);
           if (date == "" || date == undefined) {
             date = new Date();
+          } else {
+            date = new Date(date);
           }
 
           if (userId === "") {
@@ -79,7 +80,7 @@ module.exports = function(app) {
               date: date.toDateString(),
             });
            
-            user.logs.push({
+            user.log.push({
               description: description,
               duration: duration,
               date: date
@@ -115,17 +116,17 @@ module.exports = function(app) {
 
             // Filter out result based on existing properties
             if (optional.from !== undefined) {
-              user.logs = user.logs.filter( log => 
+              user.logs = user.log.filter( log => 
                 log.date >= new Date(optional.from)
               );
             } 
             if (optional.to !== undefined){
-              user.logs = user.logs.filter( log => 
+              user.logs = user.log.filter( log => 
                 log.date <= new Date(optional.to)
               );
             }
             if (optional.limit !== undefined) {
-              user.logs = user.logs.slice(0, optional.limit);
+              user.logs = user.log.slice(0, optional.limit);
             }
             res.json( user );
           } else {
@@ -135,7 +136,7 @@ module.exports = function(app) {
     } else {
       // Return all users
       User.find({}, '-_id -__v -logs._id').exec()
-        .then( logs => { res.json( logs );
+        .then( log => { res.json( log );
       }).catch(err => done(err));
     }
   });

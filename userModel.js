@@ -7,7 +7,7 @@ const userSchema = new Schema ({
     unique: true
   },
   userId: String,
-  logs: [{
+  log: [{
     description: String, 
     duration: Number, 
     date: Date 
