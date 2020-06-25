@@ -2,8 +2,8 @@ const User = require('./userModel.js')
 const shortid = require('shortid');
 
 module.exports = function(app) {
-  var done = (err, data) => {
-    console.log( err ? "Error: " + error : "Success: " + data  );
+  var done = (error, data) => {
+    console.log( error ? "Error: " + error : "Success: " + data  );
   };
   
   // 1. I can create a user by posting form data username to 
@@ -11,21 +11,23 @@ module.exports = function(app) {
   // with username and _id
   
   app.post("/api/exercise/new-user", function( req,res ) {
-    User.findOne({ username: req.body.username }).then( user => {
-      if (user !== null) {
-        return Promise.reject(new Error("The user already exist"));
-      } else {
-        const newUser = {
-          username: req.body.username,
-          userId: shortid.generate()
-        }
-        res.json({
-          username: req.body.username,
-          _id: newUser.userId
-        });
-        return User.create(newUser);
-      }
-    }).catch(err => done(err));
+    User.findOne({ username: req.body.username })
+      .then( user => {
+        if (user !== null) {
+          res.json("The user already exist");
+          return Promise.reject("The user already exist")
+        } else {
+          const newUser = {
+            username: req.body.username,
+            userId: shortid.generate()
+          }
+          res.json({
+            username: req.body.username,
+            _id: newUser.userId
+          });
+          return User.create(newUser);
+        }})
+      .catch(err => done(err));
   });
 
   // 2. I can get an array of all users by getting
@@ -49,10 +51,11 @@ module.exports = function(app) {
       .then(user => {
         if (user === null) {
           res.json("The user does not exist");
+          return Promise.reject("The user does not exist");
         } else {
           var { userId, username, description, 
               duration, date } = req.body
-
+          date = new Date(date);
           if (date == "" || date == undefined) {
             date = new Date();
           }
@@ -70,11 +73,10 @@ module.exports = function(app) {
           } else {
 
             res.json({
-              username: username,
+              userId: userId,
               description: description,
               duration: duration,
-              _id: userId,
-              date: date.toDateString()
+              date: date.toDateString(),
             });
            
             user.logs.push({
@@ -82,8 +84,8 @@ module.exports = function(app) {
               duration: duration,
               date: date
             });
-            return user.save(done);
           }
+          return user.save(done);
         }
       }).catch(err => done(err));
   });
