@@ -17,10 +17,6 @@ module.exports = function(app) {
           res.json("The user already exist");
           return Promise.reject("The user already exist")
         } else {
-          console.log("--------------------------------------")
-          console.log("api/exercise/new-users")
-          console.log(req.body);
-          console.log("--------------------------------------")
           const newUser = {
             username: req.body.username,
             userId: shortid.generate()
@@ -40,10 +36,6 @@ module.exports = function(app) {
   
   app.get("/api/exercise/users", function (req,res) {
     User.find({}, '-_id -__v -log').then( users => {
-      console.log("--------------------------------------")
-      console.log("api/exercise/users")
-      console.log(req.body);
-      console.log("--------------------------------------")
       res.json(users);
     });
   });
@@ -68,7 +60,6 @@ module.exports = function(app) {
           } else {
             date = new Date(date);
           }
-          c
 
           if (userId === "") {
             res.json( "Please enter a user ID" );
@@ -138,17 +129,17 @@ module.exports = function(app) {
             console.log("--------------------------------------")
             // Filter out result based on existing properties
             if (optional.from !== undefined) {
-              user.logs = user.log.filter( log => 
+              user.log = user.log.filter( log => 
                 log.date >= new Date(optional.from)
               );
             } 
             if (optional.to !== undefined){
-              user.logs = user.log.filter( log => 
+              user.log = user.log.filter( log => 
                 log.date <= new Date(optional.to)
               );
             }
             if (optional.limit !== undefined) {
-              user.logs = user.log.slice(0, optional.limit);
+              user.log = user.log.slice(0, optional.limit);
             }
             res.json( user );
           } else {
