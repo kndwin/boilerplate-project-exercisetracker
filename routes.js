@@ -74,9 +74,10 @@ module.exports = function(app) {
           } else {
 
             res.json({
-              userId: userId,
+              username: username,
               description: description,
               duration: duration,
+              userId: userId,
               date: date.toDateString(),
             });
            
