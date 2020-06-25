@@ -17,6 +17,10 @@ module.exports = function(app) {
           res.json("The user already exist");
           return Promise.reject("The user already exist")
         } else {
+          console.log("--------------------------------------")
+          console.log("api/exercise/new-users")
+          console.log(req.body);
+          console.log("--------------------------------------")
           const newUser = {
             username: req.body.username,
             userId: shortid.generate()
@@ -36,6 +40,10 @@ module.exports = function(app) {
   
   app.get("/api/exercise/users", function (req,res) {
     User.find({}, '-_id -__v -log').then( users => {
+      console.log("--------------------------------------")
+      console.log("api/exercise/users")
+      console.log(req.body);
+      console.log("--------------------------------------")
       res.json(users);
     });
   });
@@ -72,7 +80,10 @@ module.exports = function(app) {
           } else if (date == "Invalid Date" ) {
             res.json("Please enter a valid date")
           } else {
+            console.log("--------------------------------------")
+            console.log("api/exercise/add")
             console.log(req.body);
+            console.log("--------------------------------------")
             res.json({
               username: username,
               description: description,
@@ -114,7 +125,10 @@ module.exports = function(app) {
               to: req.query.to,
               limit: req.query.limit
             };
-
+            console.log("--------------------------------------")
+            console.log("api/exercise/log")
+            console.log(req.body);
+            console.log("--------------------------------------")
             // Filter out result based on existing properties
             if (optional.from !== undefined) {
               user.logs = user.log.filter( log => 
