@@ -77,7 +77,7 @@ module.exports = function(app) {
               username: username,
               description: description,
               duration: duration,
-              userId: userId,
+              _id: userId,
               date: date.toDateString(),
             });
            
