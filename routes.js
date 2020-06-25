@@ -72,10 +72,6 @@ module.exports = function(app) {
           } else if (date == "Invalid Date" ) {
             res.json("Please enter a valid date")
           } else {
-            console.log("--------------------------------------")
-            console.log("api/exercise/add")
-            console.log(req.body);
-            console.log("--------------------------------------")
             res.json({
               _id: userId,
               username: user.username,
@@ -83,13 +79,6 @@ module.exports = function(app) {
               duration: +duration,
               date: date.toDateString(),
             });
-            console.log({
-              username: username,
-              description: description,
-              duration: +duration,
-              _id: userId,
-              date: date.toDateString(),
-            })
             user.log.push({
               description: description,
               duration: duration,
@@ -113,7 +102,7 @@ module.exports = function(app) {
   app.get("/api/exercise/log", function( req,res ) {
     if (req.query.userId !== undefined) {
       User.find({ userId: req.query.userId}, 
-        '-_id -logs._id -__v').exec().then( user => {
+        '-_id -log._id -__v').exec().then( user => {
           // Array to Object
           user = user[0]; 
           // User exists
@@ -123,10 +112,6 @@ module.exports = function(app) {
               to: req.query.to,
               limit: req.query.limit
             };
-            console.log("--------------------------------------")
-            console.log("api/exercise/log")
-            console.log(req.body);
-            console.log("--------------------------------------")
             // Filter out result based on existing properties
             if (optional.from !== undefined) {
               user.log = user.log.filter( log => 
@@ -149,8 +134,8 @@ module.exports = function(app) {
     } else {
       // Return all users
       User.find({}, '-_id -__v -logs._id').exec()
-        .then( log => { res.json( log );
-      }).catch(err => done(err));
+        .then(log => res.json( log ))
+        .catch(err => done(err));
     }
   });
 }
